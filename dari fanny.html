@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surat Spesial Untukmu 💌</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary-blue: #0ea5e9;
+            --dark-bg: #020617;
+            --blue-grad: linear-gradient(135deg, #38bdf8 0%, #0284c7 50%, #0369a1 100%);
+            --error-red: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--dark-bg); 
+            color: white; 
+            min-height: 100vh; 
+            overflow: hidden; 
+        }
+
+        /* EFEK KETIK EMOJI */
+        .floating-emoji {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            animation: floatUp 1.5s ease-out forwards;
+            font-size: 1.2rem;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0); opacity: 1; }
+            100% { transform: translateY(-120px) scale(1.5); opacity: 0; }
+        }
+        
+        .lyrics-floater {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.4rem;
+            color: white; 
+            text-align: center;
+            width: 90%;
+            z-index: 1000;
+            pointer-events: none;
+            text-shadow: 0 2px 15px rgba(0,0,0,0.8);
+            transition: all 0.8s ease;
+            opacity: 0;
+        }
+        .lyric-top { top: 30px; }
+        .lyric-bottom { bottom: 30px; }
+
+        .watermark {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.3);
+            z-index: 2000;
+        }
+
+        .photo-background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            filter: brightness(0.2) blur(10px);
+            transition: filter 2s ease;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .photo-background-container.clear-vision { filter: brightness(0.6) blur(0px) !important; }
+
+        .marquee-row {
+            display: flex;
+            height: 50vh;
+            width: 100%;
+            position: relative;
+            will-change: transform;
+        }
+
+        .marquee-track {
+            display: flex;
+            position: absolute;
+            height: 100%;
+            width: max-content;
+            gap: 15px;
+            transform: translateZ(0);
+        }
+
+        .marquee-track img {
+            height: 100%;
+            width: auto;
+            object-fit: contain; 
+            flex-shrink: 0;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            background: #0f172a;
+        }
+
+        .row-1 .marquee-track { animation: scrollLeft 60s linear infinite; }
+        .row-2 .marquee-track { animation: scrollRight 60s linear infinite; }
+
+        @keyframes scrollLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        @keyframes scrollRight { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+        
+        .wrapper { 
+            min-height: 100vh; 
+            width: 100vw; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative; 
+            z-index: 50;
+            padding: 20px;
+        }
+        
+        .card { 
+            width: 100%;
+            max-width: 400px; 
+            background: rgba(15, 23, 42, 0.95); 
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(56, 189, 248, 0.4); 
+            border-radius: 25px; 
+            padding: 2.5rem; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        .scroll-area {
+            max-height: 40vh;
+            overflow-y: auto;
+            margin: 15px 0;
+            padding-right: 10px;
+            text-align: left;
+        }
+
+        .scroll-area::-webkit-scrollbar { width: 4px; }
+        .scroll-area::-webkit-scrollbar-thumb { background: var(--primary-blue); border-radius: 10px; }
+
+        .big-x-overlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 12rem; color: var(--error-red); z-index: 9999; pointer-events: none; opacity: 0; transition: 0.3s; }
+        .show-x { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+
+        .bubble-alert { position: absolute; bottom: 105%; left: 50%; transform: translateX(-50%) scale(0); width: 90%; background: white; color: #1e293b; padding: 12px; border-radius: 15px; font-size: 0.8rem; font-weight: bold; transition: 0.4s; z-index: 100; }
+        .bubble-show { transform: translateX(-50%) scale(1) !important; }
+        
+        .main-title { font-family: 'Dancing Script', cursive; font-size: 2.2rem; margin-bottom: 1.5rem; background: var(--blue-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .input-field { width: 100%; padding: 1rem; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.4); background: rgba(0, 0, 0, 0.5); color: white; text-align: center; outline: none; margin-bottom: 15px; font-size: 1rem; }
+        .btn { width: 100%; padding: 1rem; border-radius: 12px; border: none; background: var(--blue-grad); color: white; font-weight: bold; cursor: pointer; }
+        
+        #letterView { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="lyrics" class="lyrics-floater lyric-top">🎶 Antravelone...</div>
+    <div id="bigX" class="big-x-overlay">✖</div>
+    <div class="watermark">DARI FANNY BUAT ANTRAVELONE</div>
+
+    <div class="photo-background-container" id="bgContainer">
+        <div class="marquee-row row-1"><div class="marquee-track" id="track1"></div></div>
+        <div class="marquee-row row-2"><div class="marquee-track" id="track2"></div></div>
+    </div>
+
+    <div class="wrapper">
+        <div class="card" id="mainCard">
+            <div id="bubbleAlert" class="bubble-alert">❌ NAMA TIDAK ADA DI DAFTAR!</div>
+            
+            <div id="inputView">
+                <h1 class="main-title">A Message for You 💌</h1>
+                <input type="text" id="nameInput" placeholder="Ketik Nama Lengkap..." class="input-field" autocomplete="off" oninput="handleInput(event)">
+                <button class="btn" onclick="openSurat()">Buka Surat ✨</button>
+            </div>
+
+            <div id="letterView">
+                <div class="scroll-area" id="scrollContainer">
+                    <h2 id="greetingTitle" style="font-family: 'Dancing Script'; font-size: 1.8rem; color: var(--primary-blue); margin-bottom: 10px;"></h2>
+                    <p id="letterContent" style="line-height: 1.6; font-size: 0.95rem; white-space: pre-line; color: #e2e8f0;"></p>
+                </div>
+                <button class="btn" style="background: rgba(255,255,255,0.1); margin-top: 10px;" onclick="location.reload()">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const audio = new Audio("https://alone-peach-maid3lsvpx.edgeone.app/Sheila%20On%207%20-%20Sebuah%20Kisah%20Klasik%20(Official%20Audio).mp3");
+        
+        function handleInput(e) {
+            const emojis = ['💙', '💎', '✨', '⭐', '🌌'];
+            const emoji = document.createElement('div');
+            emoji.className = 'floating-emoji';
+            emoji.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            const rect = e.target.getBoundingClientRect();
+            emoji.style.left = (rect.left + Math.random() * rect.width) + 'px';
+            emoji.style.top = rect.top + 'px';
+            
+            document.body.appendChild(emoji);
+            setTimeout(() => emoji.remove(), 1500);
+        }
+
+        const photoLinks = [
+            "https://res.cloudinary.com/dx9h8tdbt/image/upload/v1777199439/WhatsApp_Image_2026-04-26_at_15.06.12_uxmsxv.jpg",
+            "https://res.cloudinary.com/dx9h8tdbt/image/upload/v1777199414/WhatsApp_Image_2026-04-26_at_17.26.30_uh16if.jpg",
+            "https://res.cloudinary.com/dx9h8tdbt/image/upload/v1777198197/WhatsApp_Image_2026-04-26_at_15.05.55_wrsuko.jpg",
+            "https://res.cloudinary.com/dx9h8tdbt/image/upload/v1777199396/WhatsApp_Image_2026-04-26_at_17.26.48_yoixyu.jpg",
+            "https://res.cloudinary.com/dx9h8tdbt/image/upload/v1777198577/WhatsApp_Image_2026-04-26_at_17.13.32_1_xyocfw.jpg",
+            "https://res.cloudinary.com/dx9h8tdbt/image/upload/v1777198553/WhatsApp_Image_2026-04-26_at_15.06.23_wcyjog.jpg",
+            "https://res.cloudinary.com/dx9h8tdbt/image/upload/v1777198528/WhatsApp_Image_2026-04-26_at_17.13.32_g3ksc0.jpg",
+            "https://res.cloudinary.com/dx9h8tdbt/image/upload/v1777199403/WhatsApp_Image_2026-04-26_at_17.27.51_ywkljl.jpg",
+            "https://res.cloudinary.com/dx9h8tdbt/image/upload/v1777198507/WhatsApp_Image_2026-04-26_at_17.13.31_1_zfgebh.jpg",
+            "https://res.cloudinary.com/dx9h8tdbt/image/upload/v1777198577/WhatsApp_Image_2026-04-26_at_17.13.32_1_xyocfw.jpg",
+            "https://res.cloudinary.com/dx9h8tdbt/image/upload/v1777198553/WhatsApp_Image_2026-04-26_at_15.06.23_wcyjog.jpg",
+            "https://res.cloudinary.com/dx9h8tdbt/image/upload/v1777198528/WhatsApp_Image_2026-04-26_at_17.13.32_g3ksc0.jpg"
+        ];
+
+        function fillTracks() {
+            const track1 = document.getElementById('track1');
+            const track2 = document.getElementById('track2');
+            const set1 = [...photoLinks, ...photoLinks];
+            const set2 = [...photoLinks].sort(() => Math.random() - 0.5);
+            const set2Double = [...set2, ...set2];
+            set1.forEach(link => { const img = document.createElement('img'); img.src = link; track1.appendChild(img); });
+            set2Double.forEach(link => { const img = document.createElement('img'); img.src = link; track2.appendChild(img); });
+        }
+        fillTracks();
+
+        const daftarPesan = {
+            "FANNY BRENDA ASVIMAR": { panggilan: "Fanny", isi: "Berhasil masuk! GACORRR \n\n okehhh amann berartii✨" },
+            "ADHYA FATRA FUDLOLA ENGLAN": { panggilan: "Tataa", isi: "Hallo Tataa, gimana sehat? aman? baik? Semoga yang lagi diperjuangin dapet yang terbaik. Ntar kalau udah pendidikan kabarin yaa, jangan sampe asing. Kalau jalanannya ga tahun ini mungkin tahun depan, setidaknya udah berusaha. TAPI SEMOGAA TAHUN INI YAAAA, ntar ngeliwet di lapang kite bareng barenggg. udah segitu ajaa. DITUNGGU KABAR SUKSESNYAA TAAA!" },
+            "ADINDA RANA HUMAIRA": { panggilan: "Dinda", isi: "HALLOOO DINDAAA!! ANAK TEKNIK KUUU. Aku harap kamu selalu bahagia teruss yaaa, kamu udah ngasih kabar bahagia, aku tunggu kabar bahagia lainnya yaaa. Plis jangan lupain aku, ntar kalau kamu lupain aku, aku susulin kamu ke bandung dinn sumpah ini mah. Aku ga bakal lupa digendong kamu pas game olahraga sama pak andy walaupun ujungnya jatoh makasihh yaaa. LOVE YOU DINN, SEHAT SEHAT YAA CEWEK TEKNIKK, ntar nonton windah di kolong meja lagi yaaa. \n\n #bawaakukepolban" },
+            "AMANDA SHALSABILA": { panggilan: "Manda", isi: "Haii mandaaangg. baik?? harusnya sih baik tapi kalau engga aku doain semoga kedepannya lebih baik dan selalu jadi yang terbaik yaaaa. Makasih udah bertahan sejauh ini, makasih udah jadi orang yang ceria selalu. Semangatt di depan sana masih banyak hidup dan gebrakan yang perlu ditaklukan. AKU TUNGGU KABAR BAIK DARI KAMU YAAA, JANGAN LUPAIN AKUUU yaa mandangkuuu" },
+            "ANNALA KHALIFAH KHOLIK": { panggilan: "Nala", isi: "Hai nal. Aku tau kamu seberjuang itu buat semuanya, maaf cuman bisa dengerin dan ngasih semangat, maaf juga kalau lagi cerita solusi yang aku kasih ga sengaruh itu. Gapapa nangis aja kalau emang perasaannya lagi ga enak, di dunia ini ga harus selalu bahagia kok. aku jadi perwakilan dunia ini buat bilang Maaf kalau kadang dunia ini sejahat itu, aku bakal berusaha jadi pendengar yang baik (semoga). Barangkali yang sekarang kamu usahain mati matian itu nanti bakal terkabul. KALAU UDAH TERKABUL PLISS KABARIN AKUUU. Dunia emang berat tapi tolong jangan lupa sama Allah, pasti ada jalannya dan kalau emang susah atau ga tercapai mungkin perlu jalan lain. TOLONG TETAP JADI ANNALA YANG CERIA. MAKASIH UDAH BERTAHANNN. love youuuu" },
+            "ANYA KHAIRANISA PUTRI TANDRIYANA": { panggilan: "Anya", isi: "Hii keriting dan sobat behelkuu (walaupun sekarang udah lepas) SEHAT SEHAT YA ANYAAA. Anak teknik kuu, GW SUMPAHIN SEMOGA KAMU MASUK ITS. SEHAT SEHAT DIMANAPUN BERADAA, jangan sampe kena pergaulan bebas yaa anya tetap di jalan yang benarrr. DI TUNGGU JJ PAKE SOUND 'tanteeee' SEMANGATTT kalau udah di its plis bilangin ke rektornya terima si pani pani ini masuk ke teknik kelautan hehehe. DADAHH ANYAAA NANTI KITA MAKAN MIEDOG LAGII YAAA" },
+            "AVISA DEYANA": { panggilan: "Avisa", isi: "HALOOO SOBATT 09 KUUUU. Aku harap dimanapun kamu berada tetap jadii orang baik yang selalu terbaikk (asikkk). MAKASIH UDAH AJARIN AKU DI BEBERAPA WAKTU apalagi ajarin kimia, walaupun sebenernya aku ga pernah ngerti tapi aku ucapkan TERIMA KASIH SUPER BANYAK DAN PALING BESARRR. DI TUNGGU KABAR SUKSESNYA YAA AVISAAA ANAKNYA BAPAK YAYANN. LOVEE YOUUU sobat 09 kuu" },
+            "BUNGA NOVERA": { panggilan: "Bunga", isi: "HAII SAYANGKUU, WAKILKUUU. makasih udah jadi partner akuu entah itu partner antara ketua-wakil, atau bahkan kti yang keknya bakal aku inget terusss. Kamu jangan terlalu khawatir tentang masa depan kamu yaa aku yakin seyakin yakinnyaa kamu bakal bisa berdiri di atas segala impianmu nantinya, AKU AJA YAKIN JADI KAMU HARUS YAKIN SAMA DIRI KAMU SENDIRI YAAA. jaga makan jaga jam tidurrr. JANGAN LUPAIN AKUUU, kamu lupain aku ntar BAP aku ratain sama lapas tak tersisaaa!" },
+            "BYAN ARISTA": { panggilan: "biw", isi: "halloooww biwww. Mabar rosblok yuu? Bercanda deng tapi kalau mau hayu gaskeunnnn. Disini aku mau bilang makasih selama 2 tahunnya, first experience lu ke gw keknya jelekya, soalnya tiba tiba gw sok asik (awalnya cuman pengen nanya ke nailah aja sih cuman ga sengaja jadi jailin elu). \n\n Makasih buat semuanya dan maaf kalau pernah nyakitin (pasti ada bercandaan gw yang jelek). Semoga nta jadi astronot EHH MAKSUDNYA NTAR SEMOGA BISA KELILING DUNIAAA. Mau jadi apapun atur aturlahh mau jadi perawat kek, bidan kek, psikolog kek, jadi ahli biologi kaya umi juga bolehh jadi apapun yang kamuu mau yaaa. MAKASIH udah bertahan MAKASIH UDAH SELALU JADI YANG TERBAIK DI DALAM HIDUP KAMU SENDIRI. Udah ahh cape masih harus buat long teks ke 34 orang lainnya. DADAHH BIWWW." },
+            "CANTIKA APRILIANITA HARTONO": { panggilan: "cantika", isi: "pesen pangsit 10 rebuu. \n\n bercandaaa \n\n HAI CAN? Baik ya? Aman dongg? Ga basa basi langsung aja minta maaff, minta maaf pernah bentak maneh jujur lagi pusing banget pas itu, baru bangun tidur disuruh benerin makalah SEKALI LAGI DARI HATI YANG PALINGGG DALAMM MINTAAA MAAF. Nanti kalau udah jadi mbak mbak teknik tambang/perminyakan kabarinn yaa geuliss. MAKASIH UDAH BERTAHAN \n\n Pasti selalu ada orang yang ga suka sama kamu tapi ya buat apa dipeduliin kan ya? Ga usah peduli ga ngaruh ke harga beras inii yekann." },
+            "CHAERUL SUDRAJAT": { panggilan: "arull", isi: "haloo arul. Selamat pagi/siang/sore/malem. Makasih udah jadi orang yang bikin banyak orang tertawa TAPI SUMPAHH TOLONG KURANGIN JAILNYAAA KASIAN ANAK ORANG ADA YANG SAMPE NANGISS. \n\n Pernah denger maneh sering dibandingin sama sodara maneh, gapapa kan setiap orang punya temponya sendiri-sendiri. Gw ga tau lu mau lanjut kemana sebenernya, karna lu taip ditanya jawabnya bingung, tapi semoga all in polban terwujud yaa nta jadi #teknikboys." },
+            "DERIN RATU FADILAH": { panggilan: "derin", isi: "haii derinn. Kapan mancing?? Yu mancing ahh. \n\n Makasih ya udah bertahan di dunia yang keras dan ga semua mimpi bisa terwujud. TAPI LU MAU JADI APAPUN PASTI BISAA MAU JADI SUPERHERO SEKALIAN PUN BISAAAA, percaya dehh yakin ini mah. Makasih udah jadi bendahara yang baik dan sekaligus galakk." },
+            "DIMAS PRASETYO ADJI": { panggilan: "dimas", isi: "hai dimas. Dari kelas 10 bareng teruss tapi keknya ga ada interaksi sama sekali ama gw, cuman sebutuhnya aja. TAPII SEMOGA APAPUN YANG ELU PERJUANGIN BISA TERCAPAII. Intinya mah sehat sehat dahh ngadepin dunia ini." },
+            "DWI RIZQY AL GHIFARI": { panggilan: "dwi", isi: "haiiii bocah kematiann. Dari kelas sepuluh bareng teruss. Keknya ada kebimbangan di diri lu ya wi? bimbang tentang masa depan ini, soalmya gw pernah nanya jadi daftar atau engga lu malah geleng geleng doang. LU HARUS PERCAYA SAMA DIRI SENDIRI DWI GW YAKIN LU BISAAA, SEMANGAT BANG DWII." },
+            "ELDIFFA DESFIRANZA": { panggilan: "eldiffaa", isi: "haii eldiff, salah satu calon dokter antravelone. SEMANGATT YAAA NGEJAR GELARNYAAA, AKU YAKIN 200% KAMU BISAAAA. Jalanya pasti panjang dan berliku-liku serta pasti cape sihh, tapi aku yakin kamu ga akan nyerah gitu aja. aku Titip salam yaa buat pasien-pasien kamu di masa depan. 3S Semangat Sukses Selaluu" },
+            "FENI DAHNI": { panggilan: "feni", isi: "hai fenn. Makasih yaa udah bertahan dan semangat di depan masih banyak rintangan yang harus dicobaiin. Semoga udah ga bingung lagi mau lanjut kemana yaaa. mau lanjut kemanapun apapun pilihannya gw dukung dan gw yakin lu bisa SEMANGATT TERUSSSS.." },
+            "GEBRI RASEKY DWI PRADINATA": { panggilan: "gebri", isi: "haloo bangg. Gimana usahanya lancar jaya ga bang? Makasih ya geb, udah jadi orang yang gw kenal sekarang, sering bantuin ngarahin gw sorry kalau kesannya gw ga guna jadi km karna beberapa saat gw malah lepas tanggung jawab dan malah serahin ke elu. INTINYAA SEMANGAT YA GEB BUAT KEDEPANNYAAA PASTI BAKAL TERCAPAIII APAPUN ITUU KALAU BISA MAH NTAR JADI CEO" },
+            "GIAN ARKAAN NUGRAHA": { panggilan: "gian", isi: "halo giann. PLIS KURANG KURANGIN CEROBOHNYAAA APALAGI KETINGGALAN BARANG, kasian pasien lu dimasa depan (asikkk calon dokter banget nihhh).Semoga terwujud ya jadi dokternya. Ntar kabarin yaa pak dokterr  SEMANGATTTT." },
+            "GISCA AYU NABILA": { panggilan: "cacaaa", isi: "haii cacaaa. maaf kalau terkesan nguping pembicaraan pernah denger kamu ngomong ke bu irma “mimpi aku tuh langsung pengen yang tinggi” GINI YA CAA MAU MIMPI JADI APAPUNN BUAT KAMU GA ADA YANG KETINGGIANN PASTI TERCAPAI aku percayaa jadi kamu juga harus percaya sama diri kamu sendiri. Makasih udah berusaha semaksimal mungkin,Makasih udah ngajarin gw dibeberapa waktu, Makasih udah bertahan DAN SEMANGAT YAAA CALON DOKTERR, kabarin aku ya nantii jangan lupain aku juga." },
+            "HADIF ABYAN": { panggilan: "hadip", isi: "halowwww hadippp. CALONNN COWOK TEKNIK (anjayy) hai orang baik yang tinggal di plosok tengah gurun pasir (canda). CALONNN COWOK TEKNIK (anjayy) nanti kalau gw masuk teknik juga KITA HARUS JJ BARENGG. SEMANGATT YAAA bisa kokk pasti bisa. Makasih udah jadi orang dibalik stiker yang gw pake hehe. MAKASIH UDAH BERTAHAN MAKASIH UDAH JADI ORANG YANG BIKIN ORANG LAIN KETAWAA DITUNGGU GEBRAKAN LAINNYAAA." },
+            "LIGAR PUTRA ALFA HUSNA": { panggilan: "igayy", isi: "haii ligarr. Dari kelas 10 selalu bisa diandelin futsalnya tiap class meet makasih yaa. SEMANGAT TERUSS CALON HALLO DEKK, nanti kabarin yaa kalau mau pendidikann di tunggu kabar baiknyaa." },
+            "M. GALIH JULIAN": { panggilan: "galih", isi: "halloo galihh (apa mau dipanggil julian?) Semangat yaa calon dokterr, SUMPAHH TAPI EMANG MUKA ELU KEK VIBES DOKTER GITUU plis kabulin penglihatan gw ituu. Jalannya pasti berliku terjal dan curam, TAPI GW YAKIN LU BISA LEWATIN SEMUA ITUU SEMANGAT TERUS YAAA. Kabarin kalau udah jadi dokter ntar mau nyoba periksa hehe" },
+            "MARSHAYLA SAKTI NUGRAHA": { panggilan: "saktii", isi: "haii saktii calon arsiteknya antravelone nihh. 3S: SEHAT SEHAT SEMANGAT. SESUSAH APAPUN KEDEPANNYA JANGAN NYERAH PASTI ADA JALANN. Sehat sehat harus gambar terus nanti. Sama titip pesan JANGAN NYUSAHIN ANAK TEKNI SIPIL KALAU LAGI BUAT RANCANGAN!! canda hehe" },
+            "MUHAMAD LUGINA HASAN": { panggilan: "ugii", isi: "haloo ugii, semoga tetep baik-baik aja yaa. APAPUN YANG TERJADI APAPUN HALANGANNYA YAKININ DIRI KAMU SENDIRI PASTI BISA PASTI ADA JALANNNN!!! nanti kapan kapan kita nyanyi perunggu bareng yuu" },
+            "MUHAMMAD ZAIDAN ZIDNAFANN NUGRAHA": { panggilan: "zaidan", isi: "assalamualaikumm. Jujur bingung mau ngetik apaan ya takut derin marah. SEMOGA APAPUN YANG ELU PERJUANGIN BISA TERCAPAII, plis pengen nyobain nembak. Mau kuliah atau jadi akpol atur atur aja lahh bisa pastii. Sekali lagi semangat" },
+            "NAILAH SHAFA ALMIRA": { panggilan: "nailahhh", isi: "haiiii nailahhhhhhh calonn gurukuu penerus umi lilis. AKU MAU UCAPIN SELAMAT LAGIII HEHEHE aku tau kok kamu seberjuang itu buat dapetin semuanya (ga percaya banget kalau nai bilang ga belajar) SEMANGATT YAAA BELAJARNYAA MASA DEPAN INDONESIA ADA DITANGAN KAMUU LOHH (dramatis dikit gapapa lah yaa). MAKASIHH UDAH BANTUIN AKU SELAMA 2 TAHUUNN BANYAK BANGET BANTUAN KAMU GA BISA AKU ABSEN SATU SATUUU, walaupun kesannya aku ngerecokin kamu terus maaf yaa nai, hehehe." },
+            "NEISHA ZALFA NURUL GHINA": { panggilan: "neii", isi: ": halloo anak kosann, NANTI KOSANNYA PINDAH KE DEKET UNIV IMPIANN (jangan kosannya doang deng harus jadi mahasiswi di univ impian kamuuu). MAKASIH UDAH BERTAHAN DAN SELALU BERUSAHAAA. USAHA GA AKAN MENGKHIANATI HASILL. Maaf kalau ada salah yaa…" },
+            "PRINGGA RIZKYA FAUZILHAQ": { panggilan: "pring prungg", isi: "Haii pringg (pringga p nya pisika). Makasih udah pernah ajarin fisika ke gw walaupun ya ga ngerti sihh ya hehehe. APAPUNN YANG KAMU PERJUANGIN ENTAH TEKNIK ATAU SEKDIN (sekdinnya mau sttd atau apapun) NANTI PASTI ADA SALAH SATU YANG TERCAPAII, PERCAYA DEHH aku sih percaya kamu bisa capai salah satu atau bahkan dua duanya. KAMU JUGA HARUS PERCAYA KE DIRI KAMU SENDIRII. SEMANGATT MAMANG FISIKA" },
+            "QUTRATU AINI": { panggilan: "ratu", isi: ": haii ratuu. GA USAH BASA BASI LANGSUNG SAJAA SEMOGA KAMU LOLOS YAA JADI PERAWATNYAA. Makasih udah bertahan di dunia yang keras ini semoga usaha kamu selama ini gak mengkhianati hasil. Maaf ya kalau ada salahh. SEKALI LAGI SEMANGATTTT RATUU!! PASTI BISAA" },
+            "RIVA AZZAHRA": { panggilan: "rivaa", isi: "HAII RIVAA, makasih udah bolehin kelas pake barang barang kamu berjasa banget ini mah (anjayy). SEAMANGAT YAA NGADEPIN DUNIA YANG KERAS KEDEPANNYAA, aku yakin kamu bisa PASTI BISA ga ada yang ga bisa. AKU AJA YAKIN KAMU JUGA HARUS YAKIN SAMA DIRI KAMU SENDIRI YAAA" },
+            "RIZKI MAHARDIKA": { panggilan: "rizki", isi: "" },
+            "RIZKI MAHARDIKA": { panggilan: "rizki", isi: "" },
+            "RIZKI MAHARDIKA": { panggilan: "rizki", isi: "hai rizki. Maaf kalau kelas (termasuk aku) bikin kamu ga nyaman atau bahkan jadi ga suka, di liat dari tingkah laku kamu keknya banyak yang buat kamu ga suka dan jadi ga mau berbaur (okelah ga bisa maksa semua orang). Intinya jangan ngerasa kamu sendirian banyak orang yang bisa nemenin kamu. SEMANGATT." },
+            "STELLA PUTRI PURNAMA": { panggilan: "stela awiwwiw", isi: "mau ngetik apa ya. cape udah ngetik buat banyak orang elu ga usah lah yaa? \n\n BERCANDAAAAA \n\n Makasih yaa temen sebangku (ehh da ga sebangku misah misah) temen semeja (engga juga ya da sendiri sendiri) ya udahh temen tetanggaan duduknya (tetangga dekat). MAKASiH UDAH JADI ORANG YANG SIAP BUAT MINJEMIN BARANGG kaya pulpen lahh, entah yang item ataupun yang warna warni. Maaf kalau kadang (bukang kadang lagi inimah tapi selalu) tangan gw jail nepak lah atau ngambil barang dari lu. intinya selain minta maaf mau bilang SEMANGATT YAA CALON PSIKOLOG KUUU, nanti kalau beneran jadi kabarin yaa, bukan mau konsul sih orang ga bisa dan sama sama plenger ntarnyaa INTINYAA MAAF DAN SEMANGATTT (ga usah panjang panjang lah ya masih banyak yang lainn)." },
+            "SYAHRUL FAJRI MUH SOFWAN": { panggilan: "sahrull", isi: ": Harusnya nama lu bener sih rul orang gw copy paste dari ketikan lu sendiri pas nyusun buku. SEMOGAA RENCANA LUU BUAT KERJA TERUS GAP YEAR TERUS KE LUAR NEGRI TERCAPAII YAAA (pasti tercapai sihh ini mah udah yakin bangett). Nanti open jastip tea jangan lupaaa ntar kabarin aja yaa." },
+            "VIANDRA SUSANTO": { panggilan: "viandra", isi: ": haii viandraa barudak tonggoh. Kalau ga salah ke arkeolog kann? SEMOGA TERCAPAIII pastii bisa elu kan udah berusahaa. MAU JADI APAPUN DAN KEMANAPUN SEMOGA TERCAPAII YAA. Makasih udah pernah tebengin gw. SEMANGATT TERUS HADAPIN DUNIA YANG KERAS DAN KEJAM INI." },
+            "ZAHARA NUR HASANAH": { panggilan: "jahaha", isi: "haii jahahaa, gw ga tau lu lagi merjuangin apa sebenernyaa TAPI GW YAKIN LU BISA DAPETIN ITU GW AJA YAKIN MASA DIRI LU SENDIRI GA YAKINN?? JADI HARUSS YAKIN YA SAMA POTENSI DIRI SENDIRI. Semangat teruss jahh. Kabarin kalau ntar udah lolos di ptn atau ptk yaa SEMANGATT SEKALI LAGII orang pagaden." },
+            "NAUFAL AKBAR MAULANA": { panggilan: "naupal", isi: "haii pak ustadz. MAKASIH UDAH SELALU BAWA PERALATAN LENGKAPP MAKASIH UDAH AJARIN BEBERPA MAPEL KALAU AKU NANYA JUGA, kalau bisa di bilang kamu nih kaya palugada apapun yang di mau ada dan pasti bisaa. SEMOGA APAPUN YANG KAMU USAHAIN SELALU DI JABAH ALLAH YAA SEMANGATT TERUSS PAK USTADZZ HIAYAKK SILATT" }
+        };
+
+        const lyricsElement = document.getElementById("lyrics");
+        const lirikSync = [
+            { waktu: 0, teks: "🎶 Antravelone..." },
+            { waktu: 7, teks: "🎶 Jabat tanganku mungkin untuk yang terakhir kali..." },
+            { waktu: 15, teks: "🎶 Kita berbincang tentang memori di masa itu..." },
+            { waktu: 23, teks: "🎶 Peluk tubuhku usapkan juga air mataku..." },
+            { waktu: 31, teks: "🎶 Kita terharu seakan tidak bertemu lagi..." },
+            { waktu: 40, teks: "🎶 Bersenang-senanglah karna hari akan kita rindukan..." },
+            { waktu: 48, teks: "🎶 di hari nanti sebuah kisah klasik untuk masa depan..." },
+            { waktu: 57, teks: "🎶 Bersenang-senanglah..." },
+            { waktu: 60, teks: "🎶 Kar'na waktu ini akan kita banggakan..." },
+            { waktu: 64, teks: "🎶 dihari tua... OHHHH" },
+            { waktu: 71, teks: "🎶 Sampai jumpa kawanku, semoga kita selalu" },
+            { waktu: 80, teks: "🎶 Menjadi sebuah kisah klasik untuk masa depan..." }
+        ];
+
+        audio.ontimeupdate = () => {
+            const waktu = audio.currentTime;
+            const currentIdx = lirikSync.findLastIndex(item => waktu >= item.waktu);
+            if (currentIdx !== -1) {
+                const currentLirik = lirikSync[currentIdx];
+                if (lyricsElement.innerText !== currentLirik.teks) {
+                    lyricsElement.style.opacity = 0;
+                    setTimeout(() => {
+                        lyricsElement.innerText = currentLirik.teks;
+                        lyricsElement.className = (currentIdx % 2 === 0) ? "lyrics-floater lyric-bottom" : "lyrics-floater lyric-top";
+                        lyricsElement.style.opacity = 1;
+                    }, 400);
+                }
+            }
+        };
+
+        function openSurat() {
+            const input = document.getElementById("nameInput").value.trim().toUpperCase();
+            if (daftarPesan[input]) {
+                audio.play();
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                document.getElementById("bgContainer").classList.add("clear-vision");
+                document.getElementById("inputView").style.display = "none";
+                document.getElementById("letterView").style.display = "block";
+                document.getElementById("greetingTitle").innerText = "Halo " + daftarPesan[input].panggilan + ",";
+                const content = document.getElementById("letterContent");
+                let i = 0, fullText = daftarPesan[input].isi;
+                function typeWriter() {
+                    if (i < fullText.length) {
+                        content.innerHTML += fullText.charAt(i); i++;
+                        document.getElementById("scrollContainer").scrollTop = document.getElementById("scrollContainer").scrollHeight;
+                        setTimeout(typeWriter, 30);
+                    }
+                }
+                typeWriter();
+            } else {
+                document.getElementById("bigX").classList.add("show-x");
+                document.getElementById("bubbleAlert").classList.add("bubble-show");
+                setTimeout(() => { 
+                    document.getElementById("bigX").classList.remove("show-x");
+                    document.getElementById("bubbleAlert").classList.remove("bubble-show");
+                }, 1500);
+            }
+        }
+    </script>
+</body>
+</html>
